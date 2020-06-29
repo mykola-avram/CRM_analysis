@@ -1,0 +1,14 @@
+name: "my-website"
+navbar:
+  title: "CRM practical task"
+  left:
+    - text: "Exercise 1"
+      href: Exercise 1.html
+    - text: "Exercise 2"
+      href: Exercise 2.html
+    - text: "Exercise 3"
+      href: Exercise 3.html
+    - text: "Exercise 4"
+      href: Exercise 4.html
+    - text: "Exercise 5"
+      href: Exercise 5.html
