@@ -1,0 +1,53 @@
+---
+title: "Excercise"
+output: 
+  html_notebook: 
+    toc: yes
+  html_document: 
+    toc: yes
+---
+
+
+Exercise	
+Using all given data:
+</br>
+[1. Please show overall descriptive statistics about DB ](Exercise 1.html)</br>
+[2. Define posible customer segments and present observations (gender is not given, does not make a statistical difference)     ](Exercise 2.html)
+                                               	
+                                                               	
+3. Find best timings to upsell additional amounts or customers to upsell extensions.                                          	
+4. What correlations could be found between loan time, number of extensions, additional amounts and  delays?                     	
+5. Please provide example of email and SMS which you would use to upsell additional amount to customers?	
+	
+	
+MAIN AGREEMENTS SHEET:	
+**loan.number** - Unique number of loan</br>
+**Loan status** -	Open status - loan is still; Open loan - loan is not payed back yet; Closed - loan is closed. Loan is payed back</br>
+**Closed Date** -	When customer has closed his loan</br>
+**Client Number** -	Unique customer number</br>
+client_age	</br>
+Extensions per Loan	"# of extensions customer had per particular loan (#extensions taken/loan taken).</br>
+Extension - service customer is buying in order to postpone loan repayment."</br>
+Main Amount	Euros borrowed with particular loan</br>
+Signed Date	When last loan was taken</br>
+Delay Days	How many days customer was/is delaying to repay on time (negative number represents days left till the due date)</br>
+	
+	
+	
+ADDITIONAL AGREEMENTS SHEET:	
+Agreement ID	ID of service taken
+loan.number	Unique loan number
+Additional Amount	Additional amount - service of increasing loan size.  Customers take additioal amount some time after taking main loan. Expressed in Euros
+created	When additional amount was taken
+.
+
+
+
+
+
+
+
+
+
+
+

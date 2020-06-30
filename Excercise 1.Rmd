@@ -1,0 +1,172 @@
+---
+title: "Excercise 1"
+date: "6/29/2020" 
+output: 
+  html_notebook: 
+    code_folding: hide
+    toc: yes
+---
+Contents:
+
+The first step is to merge two dataset in order two have one table for analysis:
+!Note! in order to make aggregation instead of sum() -> avg() 
+```{r}
+#Inne join
+IJ <- merge(x = MA, y = AA, by = "loan.number")
+#Outer join
+OJ <- merge(x = MA, y = AA, by = "loan.number", all = TRUE)
+#Right outer join 
+ROJ <- merge(x = MA, y = AA, by = "loan.number", all.y = TRUE)
+#LOJ
+LOJ <- merge(x = MA, y = AA, by = "loan.number", all.x = TRUE)
+
+
+# So what we have: </br>
+# **689** - loan have additional agreement 
+# the rest does not. 
+# 
+# Next step let's check what kind of relationship we have between MA and AA
+
+#**689** - duplicates in MA 
+#**7,788** - loan.number that doesn't have additional agreement 
+#**0** - additional loan.number that doesn't have main agreement
+
+summary(LOJ)
+#====================
+print('#=======================================#')
+summary(MA)
+#was a difference that's why i was using 
+#to rank the additional data and then transpose to and add to MA
+test <- transform(AA,rank=ave(1:nrow(AA),AA$loan.number,FUN=function(x) order(AA$loan.number[x],AA$created[x],decreasing=FALSE)))
+
+#====================== transponse the data ==================
+#test_1 <- dcast(test, loan.number  ~ rank, value.var="Additional.Amount")
+test_2 <- dcast(setDT(test), loan.number  ~ rank, value.var=c("Additional.Amount", "created"))
+
+#===================== join the data ========================
+
+Join_data <- merge(x = MA, y = test_2, by = "loan.number", all.x = TRUE)
+
+
+```
+In order to avoid any additional observations using join </br>
+
+## Glossary 
+
+**MM** - Main Agreements dataset
+**AA** - Additional Agreements dataset 
+
+## MA 
+
+</br>
+MA
+**
+Main Amount   
+Min.   : 40.0  
+1st Qu.:180.0  
+Median :300.0  
+Mean   :264.1  
+3rd Qu.:300.0  
+Max.   :500.0 
+**
+</br>
+ROJ
+</br>
+**
+Main Amount   
+Min.   : 40.0  
+1st Qu.:160.0  
+Median :300.0  
+Mean   :255.2  
+3rd Qu.:300.0  
+Max.   :500.0 
+**
+
+```{r}
+# DB[duplicated(DB$loan.number), ]  
+# AA[duplicated(AA$loan.number), ]  
+# MA[duplicated(MA$loan.number), ]  
+# AA[!AA$loan.number%in%MA$loan.number,]
+anti_join(MA, AA, by="loan.number")
+anti_join(AA, MA, by="loan.number")
+
+```
+
+
+```{r}
+# get means for variables in data frame mydata
+# excluding missing values
+sapply(DB, mean, na.rm=TRUE)
+# mean,median,25th and 75th quartiles,min,max
+summary(DB)
+
+# Tukey min,lower-hinge, median,upper-hinge,max
+fivenum(DB$`Main Amount`)
+describe(DB)
+
+```
+
+
+```{r}
+stat.desc(DB)
+describe(DB)
+describe.by(DB, DB$client_age)
+
+
+
+```
+
+
+
+
+
+## Preparing data for analysis 
+Observe the first 3 rows
+```{r warning=TRUE}
+head(MA, 2)
+head(AA, 2)
+#MA
+str(MA)
+#MA
+str(AA)
+```
+## Measure of central tendency
+
+### MA dataset
+```{r}
+Central_tendency <- MA %>% summarise_if(is.numeric, mean, na.rm = TRUE)  
+Central_tendency <- rbind.data.frame(Central_tendency,MA %>% summarise_if(is.numeric, median, na.rm = TRUE), stringsAsFactors = FALSE)
+
+Central_tendency <- rbind.data.frame(Central_tendency, c("Null", mfv(MA$`Client Number`),mfv(MA$client_age)[1:1],mfv(MA$`Extensions per Loan`),mfv(MA$`Main Amount`),mfv(MA$`Delay Days`)), stringsAsFactors = FALSE)
+
+Central_tendency <- cbind.data.frame(c("Mean", "Median", "Mode"),Central_tendency, stringsAsFactors = FALSE )  
+Central_tendency
+
+#MA %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+#AA %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+# x <- 'Mode for: '
+# cat("Mode client_age : ", mfv(MA$client_age))
+# cat("Mode client_age : ", mfv(MA$client_age))
+# cat("Mode client_age : ", mfv(MA$client_age))
+# cat("Mode client_age : ", mfv(MA$client_age))
+# cat("Mode client_age : ", mfv(MA$client_age))
+# mfv(MA$`Extensions per Loan`)
+# mfv(MA$`Main Amount`)
+# mfv(MA$`Delay Days`)
+# mfv(MA$`Signed Date`)
+#MA %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+#AA %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+```
+### AA dataset
+
+```{r}
+Central_tendency_AA <- AA %>% summarise_if(is.numeric, mean, na.rm = TRUE)  
+Central_tendency_AA <- rbind.data.frame(Central_tendency_AA,AA %>% summarise_if(is.numeric, median, na.rm = TRUE), stringsAsFactors = FALSE)
+
+Central_tendency_AA <- rbind.data.frame(Central_tendency_AA, c("Null", mfv(AA$loan.number),mfv(AA$Additional.Amount),NULL), stringsAsFactors = FALSE)
+
+Central_tendency_AA <- cbind.data.frame(c("Mean", "Median", "Mode"),Central_tendency_AA, stringsAsFactors = FALSE )  
+Central_tendency_AA
+```
+
+
