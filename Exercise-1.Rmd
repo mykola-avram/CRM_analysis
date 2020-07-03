@@ -1,0 +1,333 @@
+---
+title: "Descriptive analysis trial data"
+output:
+  html_document:
+    #code_folding: hide
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  html_notebook:
+    #code_folding: hide
+    toc: yes
+---
+## Preparing data for analysis
+In order to start the analysis, I need to merge two tables and verify if the analysis for one would be different than separately.
+
+```{r}
+#Inne join
+# ROJ <- merge(x = MA, y = AA, by = "loan.number", all.y = TRUE)
+# So what we have: </br>
+# **689** - loan have additional agreement
+#
+# Next step let's check what kind of relationship we have between MA and AA
+#**689** - duplicates in MA
+#**7,788** - loan.number that doesn't have additional agreement
+#**0** - additional loan.number that doesn't have main agreement
+
+summary(ROJ)
+#====================
+summary(MA)
+
+test <- transform(AA,rank=ave(1:nrow(AA),AA$loan.number,FUN=function(x) order(AA$loan.number[x],AA$created[x],decreasing=FALSE)))
+
+#====================== transponse the data ==================
+#test_1 <- dcast(test, loan.number  ~ rank, value.var="Additional.Amount")
+test_2 <- dcast(setDT(test), loan.number  ~ rank, value.var=c("Additional.Amount", "created"))
+
+#===================== join the data ========================
+
+Join_data <- merge(x = MA, y = test_2, by = "loan.number", all.x = TRUE)
+```
+
+### Check duplicates 
+```{r}
+AA[duplicated(AA$loan.number), ]
+MA[duplicated(MA$loan.number), ]
+AA[!AA$loan.number%in%MA$loan.number,]
+
+```
+
+
+```{r}
+# get means for variables in data frame mydata
+# excluding missing values
+sapply(x1, mean, na.rm=TRUE)
+# mean,median,25th and 75th quartiles,min,max
+summary(x1)
+
+# Tukey min,lower-hinge, median,upper-hinge,max
+fivenum(x1$`Main Amount`)
+describe(x1)
+
+```
+### Replace all NA with 0
+In my case would reasonable to replace "Closed" with 1, and "Open" with 0 in dataset for convenient data analysis.
+```{r}
+# stat.desc(x1)
+# describe(x1)
+# describe.by(x1, x1$client_age)
+
+#replace and convert loan status column
+MA$`Loan status`[MA$`Loan status` == "CLOSED"] <- "1"
+MA$`Loan status`[MA$`Loan status` == "OPEN"] <- "0"
+```
+
+
+## Measure of central tendency
+
+### MA dataset
+```{r}
+Central_tendency <- MA %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+Central_tendency <- rbind.data.frame(Central_tendency,MA %>% summarise_if(is.numeric, median, na.rm = TRUE), stringsAsFactors = FALSE)
+
+Central_tendency <- rbind.data.frame(Central_tendency, c("Null", mfv(MA$`Client Number`),mfv(MA$client_age)[1:1],mfv(MA$`Extensions per Loan`),mfv(MA$`Main Amount`),mfv(MA$`Delay Days`)), stringsAsFactors = FALSE)
+
+Central_tendency <- cbind.data.frame(N = c("Mean", "Median", "Mode"),Central_tendency, stringsAsFactors = FALSE )
+Central_tendency
+```
+### AA dataset
+
+```{r}
+Central_tendency_AA <- AA %>% summarise_if(is.numeric, mean, na.rm = TRUE)
+Central_tendency_AA <- rbind.data.frame(Central_tendency_AA,AA %>% summarise_if(is.numeric, median, na.rm = TRUE), stringsAsFactors = FALSE)
+
+Central_tendency_AA <- rbind.data.frame(Central_tendency_AA, c("Null", mfv(AA$loan.number),mfv(AA$Additional.Amount),NULL), stringsAsFactors = FALSE)
+
+Central_tendency_AA <- cbind.data.frame(N = c("Mean", "Median", "Mode"),Central_tendency_AA, stringsAsFactors = FALSE )
+Central_tendency_AA
+```
+
+## Measure of variablity
+### MA dataset
+
+```{r}
+variablity <- MA %>% summarise_if(is.numeric, min, na.rm = TRUE)
+variablity <- rbind.data.frame(variablity,MA %>% summarise_if(is.numeric, max, na.rm = TRUE), stringsAsFactors = FALSE)
+
+variablity <- cbind.data.frame(N = c("min", "max"),variablity, stringsAsFactors = FALSE )
+variablity
+```
+### AA dataset
+```{r}
+variablity_AA <- AA %>% summarise_if(is.numeric, min, na.rm = TRUE)
+variablity_AA <- rbind.data.frame(variablity_AA,AA %>% summarise_if(is.numeric, max, na.rm = TRUE), stringsAsFactors = FALSE)
+variablity_AA <- cbind.data.frame(N = c("min", "max"),variablity_AA, stringsAsFactors = FALSE )
+variablity_AA
+
+```
+## Interquartile range (IQR)
+The IQR criterion means that all observations above q0.75+1.5⋅IQR and below q0.25−1.5⋅IQR (where q0.25 and q0.75 correspond to first and third quartile respectively) are considered as potential outliers by R. The minimum and maximum in the boxplot are represented without these suspected outliers. Seeing all this information on the same plot help to have a good first overview of the dispersion and the location of the data. Before drawing a boxplot of our data, see below a graph explaining the information present on a boxplot.</br>
+
+### MA dataset
+
+```{r}
+IRQ <- MA %>% summarise_if(is.numeric, quantile, na.rm = TRUE)
+IRQ_AA <- AA %>% summarise_if(is.numeric, quantile, na.rm = TRUE)
+IRQ <- cbind.data.frame(N = c("0%", "25%", "50%", "75%", "100%"),IRQ, stringsAsFactors = FALSE )
+IRQ_AA <- cbind.data.frame(N = c("0%", "25%", "50%", "75%", "100%"),IRQ_AA, stringsAsFactors = FALSE )
+IRQ
+```
+
+### AA dataset
+```{r}
+ IRQ_AA
+```
+## Standard deviation, variance and absolute median deviation
+
+### MA dataset
+
+```{r}
+Var <- MA %>% summarise_if(is.numeric, var, na.rm = TRUE)
+Var <- rbind.data.frame(Var,MA %>% summarise_if(is.numeric, sd, na.rm = TRUE), stringsAsFactors = FALSE)
+Var <- rbind.data.frame(Var,MA %>% summarise_if(is.numeric, mad, na.rm = TRUE), stringsAsFactors = FALSE)
+Var <- cbind.data.frame(N = c("Variance", "Standard deviation", "Median absolute deviation"),Var, stringsAsFactors = FALSE )
+Var
+```
+
+### AA dataset
+```{r}
+Var_AA <- AA %>% summarise_if(is.numeric, var, na.rm = TRUE)
+Var_AA <- rbind.data.frame(Var_AA,AA %>% summarise_if(is.numeric, sd, na.rm = TRUE), stringsAsFactors = FALSE)
+Var_AA <- rbind.data.frame(Var_AA,AA %>% summarise_if(is.numeric, mad, na.rm = TRUE), stringsAsFactors = FALSE)
+Var_AA <- cbind.data.frame(N = c("Variance", "Standard deviation", "Median absolute deviation"),Var_AA, stringsAsFactors = FALSE )
+Var_AA
+```
+
+## Overall summary statistic of a variable
+
+### MA dataset
+
+```{r}
+# summary <- MA %>% summarise_if(is.numeric, summary, na.rm = TRUE)
+# summary <- cbind.data.frame(N = c("Min", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),summary, stringsAsFactors = FALSE )
+# summary
+```
+### AA dataset
+
+```{r}
+# summary_AA <- AA[,1:2] %>% summarise_if(is.numeric, summary, na.rm = TRUE)
+# summary_AA <- cbind.data.frame(N = c("Min", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max."),summary_AA, stringsAsFactors = FALSE )
+# summary_AA
+```          
+
+### MA dataset
+
+```{r}
+stat.desc_MA <- MA %>% summarise_if(is.numeric, stat.desc)
+stat.desc_MA <- round(stat.desc_MA, 2)
+stat.desc_MA <- cbind.data.frame(N = c("nbr.val", "nbr.null", "nbr.na", "min", "max", "range", "sum", "median", "mean", "SE.mean", "CI.mean.0.95", "var", "std.dev", "coef.var"),stat.desc_MA, stringsAsFactors = FALSE )
+
+stat.desc_MA
+```
+
+### AA dataset
+
+```{r}
+stat.desc_AA <- AA %>% summarise_if(is.numeric, stat.desc)
+stat.desc_AA <- round(stat.desc_AA, 2)
+stat.desc_AA <- cbind.data.frame(N = c("nbr.val", "nbr.null", "nbr.na", "min", "max", "range", "sum", "median", "mean", "SE.mean", "CI.mean.0.95", "var", "std.dev", "coef.var"),stat.desc_AA, stringsAsFactors = FALSE )
+
+stat.desc_AA
+```
+
+## Comparing diff attr.
+```{r}
+#outliers
+ggboxplot(MA, x = "Loan status", y = "Main Amount", width = 0.8, color = "Loan status", palette =c("#00AFBB", "#E7B800"), add = "jitter", shape = "Loan status")
+
+
+ggboxplot(MA, "Loan status", "client_age",
+     fill = "Loan status", palette = c("#00AFBB", "#FC4E07"))
+
+
+ggboxplot(MA, "Main Amount", "client_age", color = "Main Amount", ylim = c(0, 30))
+
+ggboxplot(MA, "client_age", "Extensions per Loan", color = "client_age"
+        )
+```
+
+
+
+
+
+
+
+
+
+```{r}
+#outliers
+ggboxplot(MA, "Loan status", "client_age",
+     fill = "Loan status", palette = c("#00AFBB", "#FC4E07"))
+
+
+ggboxplot(MA, "Main Amount", "client_age", color = "Main Amount")
+
+ggboxplot(MA, "client_age", "Extensions per Loan", color = "client_age"
+        )
+
+
+ggboxplot(MA, "client_age", "Extensions per Loan", color = "client_age"
+        )
+
+#AA
+
+# 
+# ggboxplot(AA, "client_age", "Extensions per Loan", color = "client_age"
+#         )
+```
+
+
+### HIstogram
+```{r}
+gghistogram(MA, x = "client_age", bins = 10, 
+             add = "mean", colors = "blue")
+
+ggecdf(MA, x = "client_age")
+ggecdf(MA, x = "Main Amount")
+
+#QQ plots is used to check whether the data is normally distributed.
+
+ggqqplot(MA, x = "Main Amount")
+qqPlot(MA$`Main Amount`)
+
+ggqqplot(MA, x = "client_age")
+qqPlot(MA$client_age)
+
+ggqqplot(MA, x = "Delay Days")
+qqPlot(MA$`Delay Days`)
+
+ggqqplot(MA, x = "Extensions per Loan")
+qqPlot(MA$`Extensions per Loan`)
+
+#AA
+ggqqplot(AA, x = "Additional.Amount") 
+qqPlot(AA$Additional.Amount) 
+
+```
+### Skewness nad Kurtosis
+ 
+
+```{r}
+describe(MA$`Main Amount`, type=3) 
+describe(MA$client_age, type=3) 
+describe(MA$`Extensions per Loan`, type=3) 
+describe(MA$`Main Amount`, type=3) 
+
+pairs(subset[,2:4], pch = 16, col = "blue", main = "Matrix Scatterplot")
+```
+
+
+
+
+
+### Compute table margins and relative frequency
+```{r}
+
+#margin.table(MA, 2)
+hist(MA$client_age, breaks=10, col = "lightblue", border = "black")
+hist(MA$`Extensions per Loan`, breaks=50, col = "lightblue", border = "black")
+hist(MA$`Main Amount`, breaks=50, col = "lightblue", border = "black")
+hist(MA$`Signed Date`, breaks=50, col = "lightblue", border = "black", labels = TRUE)
+
+
+#AA
+hist(AA$Additional.Amount, breaks=10, col = "lightgreen", border = "black")
+hist(AA$created, breaks=50, col = "lightgreen", labels = TRUE)
+
+##Density plot 
+
+
+```
+
+
+## Glossary 
+
+**MM** - Main Agreements dataset
+**AA** - Additional Agreements dataset 
+**Number_OF_AA** - Number (count) of Additional Agreements
+
+
+## Findings 
+  - None of the attributes have a normal distribution
+attributes
+ - negative skewness in Additional Amount of the distribution indicates that an company may expect frequent small amount of loan and a few large losses.
+ - Main Amount have a random variable and distributed according to some parametrized distribution, from my point of view it's signed date.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

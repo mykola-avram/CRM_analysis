@@ -1,0 +1,15 @@
+---
+title: "Excercise 1"
+date: "6/29/2020"
+output:
+  html_document:
+    toc: yes
+  html_notebook:
+    code_folding: hide
+    toc: yes
+---
+
+Contents:
+
+The first step is to merge two dataset in order two have one table for analysis:
+!Note! in order to make aggregation instead of sum() -> avg() 

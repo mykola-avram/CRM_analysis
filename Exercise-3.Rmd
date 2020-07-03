@@ -1,0 +1,101 @@
+---
+title: "Find best timings to upsell additional amounts or customers to upsell extensions"
+output:
+  html_document:
+    #code_folding: hide
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  html_notebook:
+    #code_folding: hide
+    toc: yes
+---
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+
+
+## Preparing data for analysis 
+First i will create 14 separate columns for each date of additional extensions,(14 because - one of clients nad 14 add. amounts). Instead of creating separate table for each month i divided by number of extensions for specifc loan 
+
+##Most additional amount was sold ? 
+
+```{r}
+# x <-x %>%  replace(is.na(.), 0)
+# cor(x)
+
+```
+The best time for selling the first additional extension would be second half ot the year, mostly the last 4 month, at this time also amount could be high - so definetly November and Decemebr 
+
+
+
+```{r}
+x %>%
+  arrange(desc(x$Additional.Amount_1)) %>%
+  #mutate(country = factor(country, country)) %>%
+  ggplot(aes(y=x$Additional.Amount_1, x=x$created_1, size = x$created_1, color=x$Additional.Amount_1)) +
+    geom_point(alpha = 1.5 ) +
+    scale_size(range = c(.2, 8), name="Number of clients ") +
+    ylab("First additional amount") +
+    xlab("Month") 
+```
+
+The next analysis confirm that in case of second aggrement the best motnth for upselling is December November with Septmeber
+
+
+
+```{r}
+
+x %>%
+  arrange(desc(x$Additional.Amount_2)) %>%
+  #mutate(country = factor(country, country)) %>%
+  ggplot(aes(y=x$Additional.Amount_2, x=x$created_2, size = x$created_2,    color=x$Additional.Amount_2)) +
+    geom_point(alpha = 1.5 ) +
+    scale_size(range = c(.2, 8), name="Number of clients ") +
+    ylab("Second additional amount") +
+    xlab("Month") 
+```
+And the the third additional amount slightly flatten, but underline that 4Q  of the year is the best for selling additonal amount 
+```{r}
+
+x %>%
+  arrange(desc(x$Additional.Amount_3)) %>%
+  #mutate(country = factor(country, country)) %>%
+  ggplot(aes(y=x$Additional.Amount_3, x=x$created_3, size = x$created_3,    color=x$Additional.Amount_3)) +
+    geom_point(alpha = 1.5 ) +
+    scale_size(range = c(.2, 8), name="Number of clients ") +
+    ylab("Third additional amount") +
+    xlab("Month") 
+```
+
+
+```{r}
+
+x %>%
+  arrange(desc(x$`Signed Date`)) %>%
+  #mutate(country = factor(country, country)) %>%
+  ggplot(aes(y=x$`Client Number`, x=x$`Signed Date`, size = x$`Client Number`,    color=x$`Main Amount`)) +
+    geom_point(alpha = 1.5 ) +
+    scale_size(range = c(.2, 8), name="Number of clients ") +
+    ylab("Second additional amount") +
+    xlab("Month") 
+
+
+plot(x$`Signed Date`,x$`Client Number` )
+x1 <- aggregate(x$`Signed Date`, by=list(Category= x$`Client Number`), FUN=sum)
+plot( x1$x, x1$Category)
+```
+```{r}
+timing <- merge(x = x1, y = test_2, by = "loan.number", all = TRUE)
+
+```
+
+
+
+
+## Findings 
+
+The best time for selling is 4Q of the year, December, November, less October. 
+The interesting fact that new client appears mostly at the end of the year. And most of the additional agreement was done by frequent customers with retention rates for more than 4 months.

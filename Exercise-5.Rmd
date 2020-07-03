@@ -1,0 +1,78 @@
+---
+title: "Excercise 5"
+date: "6/29/2020"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
+    code_folding: hide
+    toc: yes
+---
+<html>
+<head>
+<title>Exercise 5</title>
+
+</head>
+
+  
+<body>
+<h1>
+<p1><b>5. Please provide example of email and SMS which you would use to upsell additional amount to customers?</b></p>
+</h1>
+
+<!--begin.rcode
+summary(cars)
+end.rcode-->
+
+In order to complete task i divided customer by specific group, which of one get  specifically designed SMS and Email.
+<h2>1. Customers with a closed loan without any additional amount</h2>
+
+<h3><b>SMS</b></h3>
+SALES ALERT:
+ONLY for you. Get an additional loan today. 
+The annual percentage rate is 0%, without any added cost.
+Your promo code: xxxxxx; Not interested then recommend us to your friend and get additional loan extension for free. 
+
+<h3><b>Email</b></h3>
+<p1>Dear Customer,
+Thank you for trusting us. You are is a key investment and without money, it's hard to make your life more enjoyable and content. 
+We want to extend a free trial of our loans. We’ll happily provide you with 4 different options for your new loan only this month, without any added cost. If you love it, we can talk about working together long term. If it’s not right for you, please let us know. You can sign up here.
+Should you have any questions, by all means, feel free to contact us
+Have a great day!
+Mister X</p1>
+
+<h2>2. Customers with closed loan with 1 or 2 additional amount </h2>
+<h3><b>SMS</b></h3>
+<p1>
+  Notice: you have never missed your last recurrent payment. Get an additional loan and earn 2 free extensions per loan. Please call this number: xxxx xxxxxx.
+</p1>
+<h3><b>Email</b></h3>
+<p1>
+Hi there!
+
+We want our customers to be at their very best – that’s why we want you to come back and see us!
+Whether you’re looking for a quick loan or an additional loan, we’ve got you covered.
+And did we mention that returning customers get a 13% discount this week?
+We look forward to seeing you and stay fabulous!
+
+</p1>
+<h2>3. Customers with negative delay Days and open loan status</h2>
+
+<h3><b>SMS</b></h3>
+<p1>
+  Your loan is now in default. We want to help you get this paid by offering a 33% discount off the balance. Please call us on xxxxxxxxx.
+</p1>
+
+<h3><b>Email</b></h3>
+Hi 
+  We  notice that your loan is now in default. We can most definitely take care of your loan and would love to help! We want to help you get this paid by offering a 33% discount rate for next loan and 0% for next 2.
+  We typically recommend these services to clients who’ve gone for an extended period of time without getting loan paid.
+Should you have any questions, by all means, feel free to contact us
+
+Best Mister X
+
+
+</body>
+</html>
+

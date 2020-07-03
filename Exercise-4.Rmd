@@ -1,0 +1,253 @@
+---
+title: "Correlation?"
+output:
+  html_document:
+    #code_folding: hide
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  html_notebook:
+    #code_folding: hide
+    toc: yes
+---
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+## Preparing data for analysis 
+First thing what I need to do is to count how many customers align additional agreement and calculate the total for specific loan. 
+
+```{r}
+#Additional.Amount by loan number
+subset_AA <- aggregate(test$Additional.Amount, by=list(Category=test$loan.number), FUN=sum)
+names(subset_AA)[1] <- "loan.number"
+names(subset_AA)[2] <- "Additional.Amount_SUM"
+cat('Number of rows subset_AA: ', nrow(subset_AA), ' ')
+
+#calculate number of additional aggreement by loan
+subset_AA_ <- aggregate(test$loan.number, by=list(Category=test$loan.number), FUN=length)
+names(subset_AA_)[1] <- "loan.number"
+names(subset_AA_)[2] <- "Number_OF_AA"
+cat('Number of rows subset_AA_: ', nrow(subset_AA_))
+#merge
+subset_AA <- merge(x = subset_AA, y = subset_AA_, by = "loan.number", all = TRUE)
+
+head(subset_AA)
+```
+Let's join data from subset_AA with MA and replace all NA with 0
+
+```{r}
+#check if loan.numbr unique
+anyDuplicated(MA$loan.number)
+Join_aggr <- merge(x = MA, y = subset_AA, by = "loan.number", all = TRUE)
+head(Join_aggr)
+
+#let's connect the rest of transposes data
+Join_aggr <- merge(x = Join_aggr, y = test_2, by = "loan.number", all = TRUE)
+head(Join_aggr)
+
+#replace 0 instead NA
+Join_aggr <- as.data.frame(Join_aggr)
+Join_aggr$Additional.Amount_SUM[is.na(Join_aggr$Additional.Amount_SUM)] <- 0
+Join_aggr$Number_OF_AA[is.na(Join_aggr$Number_OF_AA)] <- 0
+Join_aggr$Additional.Amount_1[is.na(Join_aggr$Additional.Amount_1)] <- 0
+
+Join_aggr$Additional.Amount_2[is.na(Join_aggr$Additional.Amount_2)] <- 0
+Join_aggr$Additional.Amount_3[is.na(Join_aggr$Additional.Amount_3)] <- 0
+Join_aggr$Additional.Amount_4[is.na(Join_aggr$Additional.Amount_4)] <- 0
+Join_aggr$Additional.Amount_5[is.na(Join_aggr$Additional.Amount_5)] <- 0
+Join_aggr$Additional.Amount_6[is.na(Join_aggr$Additional.Amount_6)] <- 0
+Join_aggr$Additional.Amount_7[is.na(Join_aggr$Additional.Amount_7)] <- 0
+Join_aggr$Additional.Amount_8[is.na(Join_aggr$Additional.Amount_8)] <- 0
+Join_aggr$Additional.Amount_9[is.na(Join_aggr$Additional.Amount_9)] <- 0
+Join_aggr$Additional.Amount_10[is.na(Join_aggr$Additional.Amount_10)] <- 0
+Join_aggr$Additional.Amount_11[is.na(Join_aggr$Additional.Amount_11)] <- 0
+Join_aggr$Additional.Amount_12[is.na(Join_aggr$Additional.Amount_12)] <- 0
+Join_aggr$Additional.Amount_13[is.na(Join_aggr$Additional.Amount_13)] <- 0
+Join_aggr$Additional.Amount_14[is.na(Join_aggr$Additional.Amount_14)] <- 0
+
+
+Join_aggr$`Loan status` <- as.numeric(Join_aggr$`Loan status`)
+Join_aggr[,c(1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25)]  %>% replace(is.na(.), 0)
+
+#head(Join_aggr)
+
+```
+
+## Correlation 
+
+Let’s examine what the Pearson correlation shows to us
+```{r message=FALSE, warning=FALSE}
+#cor(Join_aggr[,c(1,2,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25)])
+cor(x[,unlist(lapply(MA, is.numeric))])
+pairs.panels(MA[1:7])  
+
+
+```
+
+Let's includes significance indicators
+
+```{r message=FALSE, warning=FALSE}
+chart.Correlation(x[2:11])
+
+```
+
+```{r} 
+corr_pearson <- cor.test(x$`Extensions per Loan`, x$Additional.Amount_SUM, 
+                    method = "pearson")
+corr_pearson
+
+corr_spearman <- cor.test(x$`Extensions per Loan`, x$Additional.Amount_SUM, 
+                    method = "spearman")
+corr_spearman
+```
+
+
+
+```{r}
+#hist(Join_aggr$`Closed Date`,breaks=10)
+#hist(Join_aggr$`Signed Date`,breaks=10)
+#format the date to month
+Join_aggr$`Closed Date` <- format(Join_aggr$`Closed Date`,"%m")
+Join_aggr$`Closed Date` <- as.numeric(Join_aggr$`Closed Date`)
+Join_aggr$`Signed Date` <- format(Join_aggr$`Signed Date`,"%m")
+Join_aggr$`Signed Date` <- as.numeric(Join_aggr$`Signed Date`)
+
+Join_aggr$created_1 <- format(Join_aggr$created_1,"%m")
+Join_aggr$created_2 <- format(Join_aggr$created_2,"%m")
+Join_aggr$created_3 <- format(Join_aggr$created_3,"%m")
+Join_aggr$created_4 <- format(Join_aggr$created_4,"%m")
+Join_aggr$created_5 <- format(Join_aggr$created_5,"%m")
+Join_aggr$created_6 <- format(Join_aggr$created_6,"%m")
+Join_aggr$created_7 <- format(Join_aggr$created_7,"%m")
+Join_aggr$created_8 <- format(Join_aggr$created_8,"%m")
+Join_aggr$created_9 <- format(Join_aggr$created_9,"%m")
+Join_aggr$created_10<- format(Join_aggr$created_10,"%m")
+Join_aggr$created_11<- format(Join_aggr$created_11,"%m")
+Join_aggr$created_12<- format(Join_aggr$created_12,"%m")
+Join_aggr$created_13<- format(Join_aggr$created_13,"%m")
+Join_aggr$created_14<- format(Join_aggr$created_14,"%m")
+
+
+#-----------------------------
+Join_aggr$created_1 <- as.numeric(Join_aggr$created_1)
+Join_aggr$created_2 <- as.numeric(Join_aggr$created_2)
+Join_aggr$created_3 <- as.numeric(Join_aggr$created_3)
+Join_aggr$created_4 <- as.numeric(Join_aggr$created_4)
+Join_aggr$created_5 <- as.numeric(Join_aggr$created_5)
+Join_aggr$created_6 <- as.numeric(Join_aggr$created_6)
+Join_aggr$created_7<- as.numeric(Join_aggr$created_7)
+Join_aggr$created_8 <- as.numeric(Join_aggr$created_8)
+Join_aggr$created_9 <- as.numeric(Join_aggr$created_9)
+Join_aggr$created_10 <- as.numeric(Join_aggr$created_10)
+Join_aggr$created_11 <- as.numeric(Join_aggr$created_11)
+Join_aggr$created_12 <- as.numeric(Join_aggr$created_12)
+Join_aggr$created_13 <- as.numeric(Join_aggr$created_13)
+Join_aggr$created_14 <- as.numeric(Join_aggr$created_14)
+
+
+Join_aggr <- Join_aggr[is.na(Join_aggr)] = 0
+# Join_aggr <- Join_aggr %>%
+# mutate("Closed Date" = as.Date("Closed Date", format = "%m/%d/%y"))
+
+```
+
+
+
+```{r}
+#x <- Join_aggr
+#x[is.na(x)] = 0
+ ggplot(x, aes(x=x$`Signed Date`, y=x$Additional.Amount_SUM, size = x$`Delay Days`)) +
+     geom_point(alpha=0.8)
+
+# x %>%
+#   arrange(desc(x$`Signed Date`)) %>%
+#   #mutate(x = factor(x$Number_OF_AA, x$Number_OF_AA)) %>%
+#   ggplot(aes(x="Delay Days", y="Signed Date", size = "clint_age")) +
+#     geom_point(alpha=0.5) +
+#     scale_size(range = c(.1, 24), name="Population (M)")
+
+
+x %>%   
+  arrange(desc(x$Additional.Amount_SUM)) %>%
+```
+
+
+```{r}
+x %>%
+ggplot(aes(x=x$`Signed Date`, y=x$`Extensions per Loan`, size = x$`Delay Days`)) +
+    #geom_point(alpha=0.8)
+    geom_point(alpha=0.5, shape=21, color="blue") +
+    scale_size(range = c(.1, 7), name="Population (M)") +
+    scale_fill_viridis(discrete=TRUE, guide=FALSE, option="A") +
+    theme_ipsum() +
+    theme(legend.position="bottom") +
+    ylab("Extension per Loan") +
+    xlab("Signed Date") +
+    theme(legend.position = "none")
+
+
+
+x %>%
+  arrange(desc(x$`Signed Date`)) %>%
+  #mutate(country = factor(country, country)) %>%
+  ggplot(aes(x=x$client_age, y=x$`Extensions per Loan`, size=x$Additional.Amount_SUM, x$`Main Amount`)) +
+    geom_point(alpha=0.5, color="blue") +
+    scale_size(range = c(.1, 5), name="Additional Amount_SUM (M)")
+    theme(legend.position="bottom") 
+
+plot(x$Additional.Amount_SUM, x$created_1)
+```
+
+
+
+
+
+```{r}
+knitr::kable(
+    rbind(
+         c("-1.0 to -0.9" ,"Very strong", "Negative"),
+         c("-0.9 to -0.7", "Strong", "Negative") ,
+         c("-0.7 to -0.4", "Moderate", "Negative") ,
+         c("-0.4 to -0.2", "Weak", "Negative"),
+         c("-0.2 to 0","Negligible", "Negative") ,
+         c("0 to 0.2","Negligible", "Positive"),
+         c("0.2 to 0.4", "Weak", "Positive"), 
+         c("0.4 to 0.7", "Moderate", "Positive"), 
+        c("0.7 to 0.9", "Strong", "Positive"), 
+         c("0.9 to 1.0", "Very strong", "Positive")), col.names=c("Correlation", "Strength", "Direction"), booktabs = TRUE)
+
+cor(corr)
+
+```
+
+## Findings 
+
+To summarize:
+  -  Closed Date correlates (weak negative -0.314839425) with Extensions per Loan; </br>
+  -  More loans will delay closed dates, which seems obvious; </br>
+  -  the same status get Extensions per loan with Loan Closed Date -0.314839425;</br>
+  - The signed dated and closed date shows the weak positive correlation; </br>
+  - Delay Days and Closed Date -0.3793944729 weak negative correlation;</br>
+  - Number_Of additional agreements have a strong positive correlation with    Additional.Amount_SUM, after each new agreement chance that sum will grow - also seems quite obvious </br>
+  - Amount_SUM strong correlation with the first date where customer take an additional loan;</br>
+  - Number_OF_AA   created_1  - 0.740886542; </br>
+  - the rest of attr. doesn't provide info about significant or moderate corrlation. 
+  
+Interesting facts that the total sum of the additional agreement depends on the month where the first additional agreement has taken!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

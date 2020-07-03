@@ -1,0 +1,278 @@
+---
+title: "Define posible customer segments and present observations"
+output:
+  html_document:
+    #code_folding: hide
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+  html_notebook:
+    #code_folding: hide
+    toc: yes
+---
+
+## Analyzing data from different perspective 
+Customer Segmentation is used in to better understand customers and target them accordingly. 
+```{r warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+sd(MA$client_age)
+summary(MA$`Main Amount`)
+sd(MA$client_age)
+summary(MA$client_age)
+
+plt=table(MA$client_age)
+plot <- barplot(plt,main="Using BarPlot to display age comparision",
+         ylab="Count",
+         xlab="Age",
+         col=rainbow(2),
+         legend=rownames(a))
+
+subset <- merge(x = subset, y = test_2, by = "loan.number", all = TRUE)
+
+```
+## Comparing customers by features
+
+
+```{r}
+hist(subset$client_age,
+    col="blue",
+    main="Histogram to Show Count of Age Class",
+    xlab="Age Class",
+    ylab="Frequency",
+    labels=TRUE)
+```
+```{r}
+ boxplot(x1$`Extensions per Loan`,
+         col="blue",
+         main="Boxplot for Extensions per Loan")
+ hist(x1$`Main Amount`,
+      col="#660033",
+      main="Histogram for Main Amount",
+      xlab="Main Amount",
+      ylab="Frequency",
+      labels=TRUE)
+ plot(density(x1$`Delay Days`),
+      col="yellow",
+      main="Density Plot for Delay Days",
+      xlab="Delay Days",
+      ylab="Density")
+ polygon(density(x1$Additional.Amount_SUM),
+         col="#ccff66")
+```
+
+
+
+
+
+## K-means Algorithm
+Clustering is an unsupervised machine learning technique, where there are no defined dependent and independent variables.We will use are k-means clustering for creating customer segments based on all features and spend data.In my case i will us only important attributes to define optimal amount of customers.
+
+```{r message=FALSE, warning=FALSE}
+# set.seed(123)
+# # function to calculate total intra-cluster sum of square
+# iss <- function(k) {
+#   kmeans(x1[1:5000,1:11],k,iter.max=100,nstart=10,algorithm="Lloyd" )$tot.withinss
+# }
+# k.values <- 1:100
+# iss_values <- map_dbl(k.values, iss)
+# plot(k.values, iss_values,
+#     type="b", pch = 19, frame = FALSE,
+#     xlab="Number of K clusters",
+#     ylab="Total intra-clusters sum of squares")
+```
+
+## Calculating euclidian distance 
+```{r message=FALSE, warning=FALSE}
+# k2<-kmeans(x1[,1:11],2,iter.max=10,nstart=50,algorithm="Lloyd")
+# s2<-plot(silhouette(k2$cluster,dist(x1,"euclidean")))
+```
+
+## Calculating clusters using silhouette distance 
+
+```{r message=FALSE, warning=FALSE}
+# fviz_nbclust(x1, kmeans, method = "silhouette")
+#   labs(subtitle = "Silhouette method")
+```
+
+
+## Elbow method
+```{r message=FALSE, warning=FALSE}
+# fviz_nbclust(x1, kmeans, method = "wss") +
+#     geom_vline(xintercept = 4, linetype = 2)+
+#      labs(subtitle = "Elbow method")
+```
+
+## Gap statistic
+```{r message=FALSE, warning=FALSE}
+ # set.seed(123)
+ # fviz_nbclust(x1, kmeans, nstart = 25,  method = "gap_stat", nboot = 50)+
+ #    labs(subtitle = "Gap statistic method")
+```
+
+```{r message=FALSE, warning=FALSE}
+# x1 <- Join_aggr
+# km.out <- list()
+# sil.out <- list()
+# x <- vector()
+# y <- vector()
+# minClust <- 3      # Hypothesized minimum number of segments
+# maxClust <- 5      # Hypothesized maximum number of segments
+# 
+# 
+# for (centr in minClust:maxClust) {
+#      i <- centr-(minClust-1) # relevels start as 1, and increases with centr
+#      set.seed(11) # For reproducibility
+#      km.out[i] <- list(kmeans(x1, centers = centr, nstart = 50))
+#      sil.out[i] <- list(silhouette(km.out[[i]][[1]], dist(x1)))
+#      # Used for plotting silhouette average widths
+#      x[i] = centr  # value of k
+#      y[i] = summary(sil.out[[i]])[[4]]  # Silhouette average width
+# }
+# 
+# #library(ggplot2)
+# ggplot(data = data.frame(x, y), aes(x, y)) +
+#   geom_point(size=3) +
+#   geom_line() +
+#   xlab("Number of Cluster Centers") +
+#   ylab("Silhouette Average Width") +
+#   ggtitle("Silhouette Average Width as Cluster Center Varies")
+```
+
+## Number of cluster 
+```{r}
+# max_SIL <- which.max(y)          # Row number of max silhouette value
+# optimalClusters <- x[max_SIL]    # Number of clusters
+# k-means <- km.out[[max_SIL]] # k-means output of best cluster
+# cluster_Names <- list()
+# clusterList <- list()
+# for (clust in 1:optimalClusters) {
+#   cluster_Names[clust] <- paste0("X", clust)
+#   clusterList[clust] <- list(
+#     names(
+#         k-means$cluster[k-means$cluster == clust]
+#         )
+#     )
+# }
+# names(clusterList) <- cluster_Names
+# 
+# print(clusterList)
+```
+Optimal numbers of cluster would be 4.
+
+### K means clustering 
+
+```{r}
+# kmeansDat <- x1  # Extract only customer columns
+# kmeansDat.t <- t(kmeansDat)  # Get customers in rows and products in columns
+# 
+# km.out <- list()
+# sil.out <- list()
+# x <- vector()
+# y <- vector()
+# minClust <- 4      # Hypothesized minimum number of segments
+# maxClust <- 8      # Hypothesized maximum number of segments
+```
+
+
+```{r message=FALSE, warning=FALSE}
+# Compute k-means clustering over various clusters, k, from minClust to maxClust
+for (centr in minClust:maxClust) {
+        i <- centr-(minClust-1) # relevels start as 1, and increases with centr
+        set.seed(11) # For reproducibility
+        km.out[i] <- list(kmeans(kmeansDat.t, centers = centr, nstart = 50))
+        sil.out[i] <- list(silhouette(km.out[[i]][[1]], dist(kmeansDat.t)))
+        # Used for plotting silhouette average widths
+        x[i] = centr  # value of k
+        y[i] = summary(sil.out[[i]])[[4]]  # Silhouette average width
+}
+```
+
+
+
+
+```{r message=FALSE, warning=FALSE}
+#library(ggplot2)
+# ggplot(data = data.frame(x, y), aes(x, y)) + 
+#   geom_point(size=3) + 
+#   geom_line() +
+#   xlab("Number of Cluster Centers") +
+#   ylab("Silhouette Average Width") +
+#   ggtitle("Silhouette Average Width as Cluster Center Varies")
+```
+
+
+
+
+```{r message=FALSE, warning=FALSE}
+# Get customer names that are in each segment ----------------------------------
+
+# Get attributes of optimal k-means output
+# max_SIL <- which.max(y)          # Row number of max silhouette value
+# optimalClusters <- x[max_SIL]    # Number of clusters
+# k-means <- km.out[[max_SIL]] # k-means output of best cluster
+# 
+# # Create list of customer names for each cluster
+# cluster_Names <- list()
+# clusterList <- list()
+# for (clust in 1:optimalClusters) {
+#   cluster_Names[clust] <- paste0("X", clust)
+#   clusterList[clust] <- list(
+#     names(
+#         k-means$cluster[k-means$cluster == clust]
+#         )
+#     )
+# }
+# names(clusterList) <- cluster_Names
+# 
+# print(clusterList)
+```
+
+```{r include=FALSE}
+# Combine cluster centroids with bike models for feature inspection ------------
+# custSEGM <- t(k-means$centers)  # Get centroids for groups
+# colnames(custSEGM) <- make.names(colnames(custSEGM))
+# x <- cbind(x1, custSEGM)
+```
+
+### Clsuter 1
+```{r message=FALSE, warning=FALSE}
+attach(x)  
+knitr::kable(head(x[order(-X1), c(1:10, 10)], 10))
+```
+
+### Clsuter 2
+```{r message=FALSE, warning=FALSE}
+attach(x)  
+knitr::kable(head(x[order(-X2), c(1:10, 10)], 10))
+```
+
+
+
+### Clsuter 3
+```{r message=FALSE, warning=FALSE}
+attach(x)  
+knitr::kable(head(x[order(-X3), c(1:10, 10)], 10))
+```
+
+
+### Clsuter 4
+```{r message=FALSE, warning=FALSE}
+attach(x) 
+knitr::kable(head(x[order(-X4), c(1:10, 10)], 10))
+```
+
+### Ploting the cluster 
+```{r message=FALSE, warning=FALSE}
+p<-ggplot(cluster.pc4,aes(x=PC1,y=PC2,color=kmeans.cluster))
+p+geom_point() +
+  theme_bw() + scale_y_continuous(labels = scales::comma) + 
+  ggtitle(label='PCA with 4 cluster K-means')
+```
+
+
+## Findings
+  After using K-means algorithm and Principal component analysis
+The appropriate number of clusters are 4, using settings (including parameters such as the distance function, density threshold and the number of expected clusters) clustering the data based on the additional amount, count of additional amount, and the total sum of customers, revealed 4 separable clusters to analyze. Cluster analysis helped to identify the customers in each cluster based on their client number.
+
